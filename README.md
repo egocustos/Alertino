@@ -1,4 +1,0 @@
-Alertino
-========
-
-Programa Alertino

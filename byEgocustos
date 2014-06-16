@@ -1,0 +1,57 @@
+import bitalino #Importa la librería que se usa para el desarrollo del programa en función de las señales emitidas por nuestro Alertino.
+import time #Importa la librería de python para que se puedan realizar conteos de tiempo durante el desarrollo del programa.
+device = bitalino.BITalino()    #Se define el dispositivo a utilizar en el programa
+
+macAddress = "98:D3:31:B2:12:EC"    #Reconocimiento de la MAC del bitalino en su programa.
+SamplingRate = 100 #Se realizarán 100 lecturas de potenciales eléctricos por segundo de cada puerto.
+device.open(macAddress, SamplingRate) #Inicializa el dispositivo (bitalino, adjudicándole la cantidad de lecturas de V a considerar)
+
+th = device.battery(20) #Se verifica el estado de la batería del Alertino.
+
+BITversion = device.version() #Se obtiene la versión del firmware del bitalino, almacenandola en la variable BITversion.
+print BITversion #Se imprime la versión en pantalla (del programa)
+
+device.start([0,1,2,3,4,5]) #Activamos la adquisición de datos en las 6 entradas de la plataforma Bitalino.
+device.trigger([0,0,0,0]) #Cerramos los 4 OUTPUTS del Bitalino.
+
+ciclos = 10000  #Cantidad de ciclos que se ejecutará el programa antes de mostrar una emisión final.
+a = 0   #Se inicializa la cantidad de ciclos a realizar.
+read = 100           #Se declara la cantidad de muestras que entregara el sensor al programa.
+
+print "Bienvenido a Alertino! El sensor comenzará a funcionar en 5 segundos!"
+
+import os
+os.startfile ('intro.mp3')    #Acá importamos la librería OS. Sirve para que el programa interactúe con el PC en términos de emitir sonidos.
+time.sleep(5)                   #Específicamente lo que hace acá es provocar un descanso desde el final del tono importado para la posterior ejecución del programa.
+
+
+
+
+while a < ciclos:                       #Inicio del programa de lectura de las señales eléctricas. 
+    
+    dataAcquired = device.read(read) #Esta sección de código ordena el “arreglo” bidimensional generado en la lectura de datos. 
+    SeqN = dataAcquired[0,:]        #Dispone en distintas “arreglos” unidimensionales los datos correspondientes	a cada entrada.
+    D0 = dataAcquired[1,:]
+    D1 = dataAcquired[2,:]
+    D2 = dataAcquired[3,:]
+    D3 = dataAcquired[4,:]
+    A0 = dataAcquired[5,:] #Se guarda en la variable A0 los datos originarios del EMG.
+    A1 = dataAcquired[6,:]
+    A2 = dataAcquired[7,:]
+    A3 = dataAcquired[8,:]
+    A4 = dataAcquired[9,:]
+    A5 = dataAcquired[10,:]
+    
+    datos = A0 #Se guarda en la variable datos la lectura que nos entrega el puerto A0 (EMG)
+    maximo = datos.max() #Se guarda en la variable maximo el dato más alto de la lectura realizada.
+    if maximo < 510: 
+        import os
+        os.startfile('alarma.mp3')    #Si se baja de un parámetro establecido se activa la aarma.
+        time.sleep(.5)
+                
+    a = a + 1 #Se suma 1 a la variable a para que aumente el numero de ciclos evaluados en el programa.
+    
+
+device.stop() #Detenemos la lectura del dispositivo (esto es cuando la variable a llega al valor de ciclos que dejamos en 10 mil.
+device.close() #Cerramos la conexión del bluetooth del dispositivo
+
